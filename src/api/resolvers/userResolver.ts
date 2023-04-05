@@ -67,14 +67,14 @@ export default {
   Mutation: {
     login: async (
       _parent: unknown,
-      args: {username: string; password: string}
+      args: {credentials: {username: string; password: string}}
     ) => {
       const response = await fetch(`${process.env.AUTH_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(args),
+        body: JSON.stringify(args.credentials),
       });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
@@ -84,13 +84,13 @@ export default {
       const user = (await response.json()) as LoginMessageResponse;
       return user;
     },
-    register: async (_parent: unknown, args: User) => {
+    register: async (_parent: unknown, args: {user: User}) => {
       const response = await fetch(`${process.env.AUTH_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(args),
+        body: JSON.stringify(args.user),
       });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
