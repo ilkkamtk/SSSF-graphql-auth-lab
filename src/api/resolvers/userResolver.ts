@@ -105,7 +105,6 @@ export default {
       args: {user: User},
       user: UserIdWithToken
     ) => {
-      console.log('updateUser', user);
       if (!user.token) {
         throw new GraphQLError('Not authorized', {
           extensions: {code: 'NOT_AUTHORIZED'},
@@ -133,6 +132,12 @@ export default {
       _args: unknown,
       user: UserIdWithToken
     ) => {
+      if (!user.token) {
+        throw new GraphQLError('Not authorized', {
+          extensions: {code: 'NOT_AUTHORIZED'},
+        });
+      }
+
       const response = await fetch(`${process.env.AUTH_URL}/users`, {
         method: 'DELETE',
         headers: {
