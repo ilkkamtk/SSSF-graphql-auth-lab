@@ -5,8 +5,23 @@
 import {GraphQLError} from 'graphql';
 import {User, UserIdWithToken} from '../../interfaces/User';
 import LoginMessageResponse from '../../interfaces/LoginMessageResponse';
+import {Animal} from '../../interfaces/Animal';
 
 export default {
+  Animal: {
+    owner: async (parent: Animal) => {
+      const response = await fetch(
+        `${process.env.AUTH_URL}/users/${parent.owner}`
+      );
+      if (!response.ok) {
+        throw new GraphQLError(response.statusText, {
+          extensions: {code: 'NOT_FOUND'},
+        });
+      }
+      const user = (await response.json()) as User;
+      return user;
+    },
+  },
   Query: {
     users: async () => {
       const response = await fetch(`${process.env.AUTH_URL}/users`);
@@ -15,17 +30,17 @@ export default {
           extensions: {code: 'NOT_FOUND'},
         });
       }
-      const users = await response.json();
+      const users = (await response.json()) as User[];
       return users;
     },
-    userById: async (_: any, args: {id: string}) => {
+    userById: async (_parent: unknown, args: {id: string}) => {
       const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`);
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
         });
       }
-      const user = await response.json();
+      const user = (await response.json()) as User;
       return user;
     },
     checkToken: async (
