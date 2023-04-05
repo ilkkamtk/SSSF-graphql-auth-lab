@@ -3,7 +3,7 @@
 // Mutation: login, register, updateUser, deleteUser
 
 import {GraphQLError} from 'graphql';
-import {User} from '../../interfaces/User';
+import {User, UserIdWithToken} from '../../interfaces/User';
 
 export default {
   Query: {
@@ -27,10 +27,14 @@ export default {
       const user = await response.json();
       return user;
     },
-    checkToken: async (_parent: unknown, _args: unknown, user: User) => {
+    checkToken: async (
+      _parent: unknown,
+      _args: unknown,
+      user: UserIdWithToken
+    ) => {
       console.log(user);
 
-      const response = await fetch(`${process.env.AUTH_URL}/token`, {
+      const response = await fetch(`${process.env.AUTH_URL}/users/token`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
