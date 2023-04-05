@@ -100,14 +100,25 @@ export default {
       const user = (await response.json()) as LoginMessageResponse;
       return user;
     },
-    updateUser: async (_parent: unknown, args: User, user: UserIdWithToken) => {
+    updateUser: async (
+      _parent: unknown,
+      args: {user: User},
+      user: UserIdWithToken
+    ) => {
+      console.log('updateUser', user);
+      if (!user.token) {
+        throw new GraphQLError('Not authorized', {
+          extensions: {code: 'NOT_AUTHORIZED'},
+        });
+      }
+
       const response = await fetch(`${process.env.AUTH_URL}/users`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,
         },
-        body: JSON.stringify(args),
+        body: JSON.stringify(args.user),
       });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
