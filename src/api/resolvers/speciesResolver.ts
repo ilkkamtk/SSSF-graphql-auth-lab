@@ -4,6 +4,16 @@ import {Animal} from '../../interfaces/Animal';
 import {Species} from '../../interfaces/Species';
 import {UserIdWithToken} from '../../interfaces/User';
 import speciesModel from '../models/speciesModel';
+import {io, Socket} from 'socket.io-client';
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from '../../interfaces/ISocket';
+
+// socket.io client
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
+  process.env.SOCKET_URL as string
+);
 
 export default {
   Animal: {
@@ -34,7 +44,9 @@ export default {
       const image = await imageFromWikipedia(args.species_name);
       args.image = image;
       const species = new speciesModel(args);
-      return await species.save();
+      const result = await species.save();
+      socket.emit('update', 'species');
+      return result;
     },
     modifySpecies: async (
       _parent: undefined,

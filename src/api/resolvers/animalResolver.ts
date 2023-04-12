@@ -5,6 +5,16 @@ import {locationInput} from '../../interfaces/Location';
 import {UserIdWithToken} from '../../interfaces/User';
 import {GraphQLError} from 'graphql';
 import {Types} from 'mongoose';
+import {io, Socket} from 'socket.io-client';
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from '../../interfaces/ISocket';
+
+// socket.io client
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
+  process.env.SOCKET_URL as string
+);
 
 export default {
   Query: {
@@ -39,7 +49,9 @@ export default {
       args.owner = user.id as unknown as Types.ObjectId;
       console.log(args);
       const animal = new animalModel(args);
-      return await animal.save();
+      const result = await animal.save();
+      socket.emit('update', 'animal');
+      return result;
     },
     modifyAnimal: async (
       _parent: undefined,
